@@ -1,0 +1,365 @@
+:root {
+  --ink: #1e1b16;
+  --ink-soft: #2a251d;
+  --parchment: #f3ecdd;
+  --parchment-dim: #cfc6b0;
+  --ember: #c89b3c;
+  --ember-bright: #e0b558;
+  --moss: #6b7a5e;
+  --line: rgba(243, 236, 221, 0.12);
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: rgba(30, 27, 22, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--parchment);
+}
+
+.brand .spark {
+  color: var(--ember-bright);
+  font-size: 16px;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  font-size: 14px;
+  padding: 9px 16px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--parchment);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.btn:hover {
+  border-color: var(--parchment-dim);
+}
+
+.btn-primary {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--ember-bright);
+  border-color: var(--ember-bright);
+}
+
+.btn-text {
+  border-color: transparent;
+  color: var(--parchment-dim);
+}
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 28px;
+  width: 100%;
+  flex: 1;
+}
+
+.hero {
+  padding: 64px 0 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 52px);
+  font-weight: 500;
+  line-height: 1.1;
+  margin: 0 0 14px;
+}
+
+.hero p {
+  color: var(--parchment-dim);
+  font-size: 17px;
+  max-width: 46ch;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---------- Feed ---------- */
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.idea-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.idea-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--parchment-dim);
+  margin-bottom: 10px;
+}
+
+.idea-meta .spark {
+  color: var(--ember);
+  font-size: 13px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.idea-card:hover .spark {
+  color: var(--ember-bright);
+  transform: scale(1.15);
+}
+
+.idea-card h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.idea-card p {
+  color: var(--parchment-dim);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--parchment-dim);
+}
+
+.empty-state h3 {
+  font-family: var(--font-display);
+  color: var(--parchment);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+/* ---------- Forms ---------- */
+.form-page {
+  padding: 48px 0;
+  max-width: 480px;
+}
+
+.form-page.wide {
+  max-width: 640px;
+}
+
+.form-page h1 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  margin: 0 0 28px;
+}
+
+.field {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  color: var(--parchment-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.field input,
+.field textarea {
+  background: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--parchment);
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: var(--font-body);
+  outline: none;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--ember);
+}
+
+.field textarea {
+  min-height: 260px;
+  line-height: 1.6;
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+
+.form-error {
+  background: rgba(200, 90, 60, 0.12);
+  border: 1px solid rgba(200, 90, 60, 0.4);
+  color: #e0a488;
+  padding: 10px 14px;
+  border-radius: 3px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.switch-link {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--parchment-dim);
+}
+
+.switch-link button {
+  background: none;
+  border: none;
+  color: var(--ember-bright);
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+/* ---------- Article page ---------- */
+.article-page {
+  padding: 48px 0 80px;
+}
+
+.article-page .idea-meta {
+  margin-bottom: 18px;
+}
+
+.article-page h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 28px;
+}
+
+.article-body {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #ece4d2;
+}
+
+.article-actions {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+}
+
+.footer {
+  padding: 28px;
+  text-align: center;
+  color: var(--parchment-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.loading {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--parchment-dim);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 16px 18px;
+  }
+  .container {
+    padding: 0 18px;
+  }
+}
