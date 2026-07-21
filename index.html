@@ -45,7 +45,6 @@
     color: var(--rose-dust);
   }
 
-  /* ---------- Header ---------- */
   header{
     display:flex;
     align-items:center;
@@ -88,7 +87,6 @@
   }
   .btn-primary:hover{ background: var(--ember-bright); transform: translateY(-1px); }
 
-  /* ---------- Hero ---------- */
   .hero{
     position:relative;
     padding: clamp(3rem, 8vw, 6rem) clamp(1.2rem, 4vw, 3rem) 2rem;
@@ -151,7 +149,6 @@
   }
   .btn-ghost:hover{ background: var(--plum-surface); }
 
-  /* ---------- Categories ---------- */
   .categories{
     max-width: 900px;
     margin: 2.5rem auto 0;
@@ -203,7 +200,6 @@
   .cat-pill.cat-Voyage{ --cat-color: #5b9bd5; }
   .cat-pill.cat-Sport{ --cat-color: #e08a45; }
 
-  /* ---------- Feed ---------- */
   .container{
     max-width: 780px;
     margin: 0 auto;
@@ -263,7 +259,7 @@
     transition: all 0.15s ease;
   }
   .warmth-btn:hover{ border-color: var(--ember); color: var(--ember-bright); }
-  .warmth-btn.lit{ color: var(--ember-bright); border-color: var(--ember); }
+  .warmth-btn.lit{ color: var(--ember-bright); border-color: var(--ember); background: var(--plum-surface-raised); }
 
   .reply-btn{
     display:flex;
@@ -316,7 +312,6 @@
     font-weight:600;
   }
 
-  /* ---------- Comments ---------- */
   .comments{
     margin-top:1rem;
     padding-top:1rem;
@@ -393,7 +388,6 @@
   }
   .comment-send:hover{ background: var(--ember-bright); }
 
-  /* ---------- Empty state ---------- */
   .empty-state{
     text-align:center;
     padding: 3.5rem 1.5rem;
@@ -409,7 +403,6 @@
     margin-bottom:0.5rem;
   }
 
-  /* ---------- Modal ---------- */
   .modal-overlay{
     position:fixed; inset:0;
     background: rgba(20,14,22,0.6);
@@ -569,11 +562,18 @@
   }
   const deviceId = getDeviceId();
   let isBanned = false;
+  let likedPostIds = new Set();
 
   async function checkBanned(){
     const { data, error } = await sb.from('banned_devices').select('device_id').eq('device_id', deviceId).maybeSingle();
     if(error){ console.error(error); return; }
     isBanned = !!data;
+  }
+
+  async function loadLikedPosts(){
+    const { data, error } = await sb.from('post_likes').select('post_id').eq('device_id', deviceId);
+    if(error){ console.error(error); return; }
+    likedPostIds = new Set((data || []).map(r => r.post_id));
   }
 
   async function banDevice(targetDeviceId){
@@ -668,6 +668,7 @@
 
     feedEl.innerHTML = list.map(p => {
       const catInfo = CATS.find(c=>c.key===p.category);
+      const isLiked = likedPostIds.has(p.id);
       return `<article class="post-card">
         <div class="post-top">
           <span class="post-cat">${catInfo ? catInfo.label : p.category}</span>
@@ -682,7 +683,7 @@
           </div>
         ` : ''}
         <div class="post-actions">
-          <button class="warmth-btn" data-id="${p.id}">🔥 <span>${p.warmth || 0}</span></button>
+          <button class="warmth-btn${isLiked ? ' lit' : ''}" data-id="${p.id}">🔥 <span>${p.warmth || 0}</span></button>
           <button class="reply-btn" data-id="${p.id}">💬 <span>${(p.comments || []).length}</span></button>
           <button class="report-btn" data-report-post="${p.id}">🚩 Signaler</button>
           ${isAdmin ? `<button class="delete-post-btn" data-id="${p.id}">🗑️ Supprimer</button>` : ''}
@@ -699,7 +700,7 @@
     }).join('');
 
     feedEl.querySelectorAll('.warmth-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=> bumpWarmth(btn.dataset.id));
+      btn.addEventListener('click', ()=> toggleWarmth(btn.dataset.id));
     });
 
     feedEl.querySelectorAll('.reply-btn').forEach(btn=>{
@@ -869,13 +870,38 @@
     renderFeed();
   }
 
-  async function bumpWarmth(id){
+  async function toggleWarmth(id){
+    if(isBanned){ alert("Tu ne peux plus interagir sur ce site."); return; }
     const post = posts.find(p=>p.id===id);
     if(!post) return;
-    const newWarmth = (post.warmth||0) + 1;
-    const { error } = await sb.from('posts').update({ warmth: newWarmth }).eq('id', id);
-    if(error){ console.error(error); return; }
-    post.warmth = newWarmth;
+
+    const alreadyLiked = likedPostIds.has(id);
+
+    if(alreadyLiked){
+      const { error: delError } = await sb.from('post_likes').delete().eq('post_id', id).eq('device_id', deviceId);
+      if(delError){ console.error(delError); return; }
+      const newWarmth = Math.max((post.warmth||0) - 1, 0);
+      const { error } = await sb.from('posts').update({ warmth: newWarmth }).eq('id', id);
+      if(error){ console.error(error); return; }
+      post.warmth = newWarmth;
+      likedPostIds.delete(id);
+    } else {
+      const { error: insError } = await sb.from('post_likes').insert({ post_id: id, device_id: deviceId, created_at: Date.now() });
+      if(insError){
+        if(insError.code === '23505'){
+          likedPostIds.add(id);
+          renderFeed();
+        } else {
+          console.error(insError);
+        }
+        return;
+      }
+      const newWarmth = (post.warmth||0) + 1;
+      const { error } = await sb.from('posts').update({ warmth: newWarmth }).eq('id', id);
+      if(error){ console.error(error); return; }
+      post.warmth = newWarmth;
+      likedPostIds.add(id);
+    }
     renderFeed();
   }
 
@@ -1009,10 +1035,9 @@
 
   renderNav();
   checkBanned();
-  loadPosts();
+  loadLikedPosts().then(loadPosts);
 })();
 </script>
 
 </body>
 </html>
-
